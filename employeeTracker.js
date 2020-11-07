@@ -52,6 +52,12 @@ inquirer.prompt(
         {   
             addDepartment ("department")
         }
+        else if(answer.questionOne==="Add Roles")
+        {   
+            addRole()
+
+        }
+
         
         })
 
@@ -89,6 +95,46 @@ function insertNewDepartment (newDepartmentName)
              if (err) throw err;
 
         });
+}
+//Todo: revisar functions de addRole, and map. 
 
+function addRole()
+{   // 1. do query to find all departments. 
+    connection.query("SELECT * FROM department" , function(err, results) {
+    if (err) throw err;
+    console.log(results);
+    var depNames = results.map(function(value,index){
+       return value.id + "-" +value.name
+    })
+    console.log(depNames); 
+    //2. Inquire (another function that ask questions to add role with departments as params)
+    inquireRoleInfo(depNames)
+    })
+
+}
+
+function inquireRoleInfo(departments)
+{inquirer.prompt(
+    [
+        {
+            name: "roleTitle", 
+            type: "input", 
+            message: "What is the Job Title?"
+        }, 
+        {
+            name: "roleSalary", 
+            type: "number", 
+            message: "What is the salary for this position?"
+        }, 
+        {
+            name: "roleDeptId", 
+            type: "list", 
+            message: "Please select a department for this position",
+            choices: departments,
+        }
+
+
+]
+)
 
 }
