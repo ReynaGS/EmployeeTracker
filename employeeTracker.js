@@ -43,11 +43,16 @@ inquirer.prompt(
              view("role");
 
         }
-        else if(answer.questionOne ==="View Employees")
+        else if(answer.questionOne === "View Employees")
         {
             view("employee");
 
         }
+        else if(answer.questionOne=== "Add departments")
+        {   
+            addDepartment ("department")
+        }
+        
         })
 
 }
@@ -60,3 +65,30 @@ function view (tableName)
 
     })
 };
+
+function addDepartment (tableName)
+{inquirer.prompt
+    ({name: "departmentQuestionOne", 
+    type: "input", 
+    message: "What department would you like to add?"
+    
+}).then(function(respuestas)
+{   
+    insertNewDepartment(respuestas.departmentQuestionOne);     
+    console.log(respuestas); 
+}); 
+    
+}
+
+function insertNewDepartment (newDepartmentName)
+{   connection.query("INSERT INTO department SET ?",
+        {  
+            name: newDepartmentName, 
+
+        },function(err){
+             if (err) throw err;
+
+        });
+
+
+}
