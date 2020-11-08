@@ -61,6 +61,11 @@ inquirer.prompt(
         {
             addEmployee();
         }
+        else if(answer.questionOne === "Update Employee Role")
+        {   
+            updateRole()
+
+        }
 
         
         })
@@ -267,4 +272,102 @@ function insertNewEmployee (employee)
              console.log("New Employee Added")
 
         });
+}
+// "Update Employee Role"
+    // SELECT * FROM employee to 
+        // Select employee to be update 
+    // SELECT * FROM role to display all roles
+        //choose new role 
+    // UPGRADE new role
+
+function updateRole()
+{   // SELECT * FROM employee to 
+    connection.query("SELECT * FROM role", function(error, results)
+    {
+        if(error)throw error;
+          console.log(results) ; 
+        var roleMap = results.map(function(value,index)
+        {
+            var roleAndId = value.id + "-" + value.title
+            return roleAndId
+
+        })
+        console.log(roleMap); 
+        displayAllEmployees(roleMap); 
+    })
+    
+}
+
+function displayAllEmployees (roleMap)
+{ 
+     connection.query("SELECT * FROM employee", function(error, results)
+    {
+        if(error) throw error ; 
+        console.log(results); 
+        var idFromManager = results.map(function(value,index)
+        {
+            //map out employ id  + " " + employe name + " "+ employee last name.
+            var mangIdName = value.id + "-" + value.first_name +" "+ value.last_name
+            return mangIdName; 
+
+        });
+         console.log(idFromManager); 
+         askToUpdateEmployeeRole(roleMap, idFromManager);
+        
+    })
+
+}
+function askToUpdateEmployeeRole (employeeRole, employeeList)
+{inquirer.prompt([
+    
+    {
+        name: "idName",
+        type: "list",
+        message: "On which employee would you like to update role?",
+        choices: employeeList,
+
+    },
+
+    {
+        name: "role",
+        type: "list",
+        message: " Which role would you like to update?", 
+        choices: employeeRole,
+
+    }
+]
+
+).then(function(answers)
+    {
+        console.log(answers); 
+
+        var role_id = answers.role.split("-")[0]
+        var employee_id = answers.idName.split("-")[0]
+
+        changeRole({role_id:role_id, employee_id:employee_id})
+
+    })
+
+}
+
+function changeRole(newRole)
+{
+    connection.query(
+            "UPDATE employee SET ? WHERE ?",
+            [
+              {
+                role_id: newRole.role_id,
+              },
+              {
+                id: newRole.employee_id
+              }
+            ],
+            function(error) {
+              if (error) throw err;
+              console.log(" Updated ID Successfully");
+              
+            }
+          );
+    
+
 }
