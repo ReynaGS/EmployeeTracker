@@ -54,8 +54,12 @@ inquirer.prompt(
         }
         else if(answer.questionOne==="Add Roles")
         {   
-            addRole()
+            addRole(); 
 
+        }
+        else if(answer.questionOne === "Add Employees")
+        {
+            addEmployee();
         }
 
         
@@ -96,13 +100,14 @@ function insertNewDepartment (newDepartmentName)
 
         });
 }
-//Todo: revisar functions de addRole, and map. 
+
 
 function addRole()
 {   // 1. do query to find all departments. 
     connection.query("SELECT * FROM department" , function(err, results) {
     if (err) throw err;
     // console.log(results);
+    // map to return department id and name to be able to use split later. 
     var depNames = results.map(function(value,index){
         return value.id + "-" +value.name
         
@@ -142,6 +147,7 @@ function inquireRoleInfo(departments)
     // console.log(id); 
     // console.log(answers); 
 
+        // invoke function created below, pass a literal object as param. 
   insertNewRoleIntoDb({title: answers.roleTitle, salary: answers.roleSalary, department_id: id})
     
 
@@ -161,4 +167,104 @@ function insertNewRoleIntoDb (newRole)
             console.log("New role has been created")
         });
 
+}
+
+function addEmployee ()
+{ 
+    // need 
+    // - first name 
+    // - last name
+    // - role id 
+    //query to select * from role 
+    connection.query(" SELECT * FROM role", function(error, results)
+    {
+        if (error)throw error; 
+        console.log(results); 
+        // map out role id + " " +  role title
+        var rolesId = results.map(function(value, index){
+           var idAndTitleId =  value.id + "-" + value.title
+            return idAndTitleId; 
+        })
+        console.log(rolesId); 
+        getManagerId(rolesId); 
+    });    
+       
+ // then make query to insert employee to table
+
+}
+  // - manager id 
+function getManagerId(rolesId){
+    // query to select * employees from employee table
+    connection.query("SELECT * FROM employee", function(error, results)
+    {
+        if(error) throw error ; 
+        console.log(results); 
+        var idFromManager = results.map(function(value,index)
+        {
+            //map out employ id  + " " + employe name + " "+ employee last name.
+            var mangIdName = value.id + "-" + value.first_name +" "+ value.last_name
+            return mangIdName; 
+           
+
+        });
+         console.log(idFromManager); 
+         newEmployeeData(rolesId , idFromManager); 
+
+    })
+
+}
+
+function newEmployeeData(rolesId, managerId)
+{  inquirer.prompt(
+[   {
+    name: "first_name", 
+    type: "input",
+    message: "What is the employee's Name?"
+    },
+    {
+    name: "last_name", 
+    type: "input",
+    message: "What is the employee's Last Name?"
+    },
+    {
+    name: "role_id", 
+    type: "list",
+    message: "What is the role id?",
+    choices: rolesId, 
+    },
+    {
+    name: "manager_id", 
+    type: "list",
+    message: "What is the manager id?",
+    choices: managerId, 
+    },
+
+]).then(function(answer){
+    var roleId = answer.role_id.split("-")[0]; 
+    var managerId= answer.manager_id.split("-")[0];
+    insertNewEmployee(
+        {
+            first_name: answer.first_name, 
+            last_name: answer.last_name, 
+            role_id: roleId, 
+            manager_id: managerId,
+        }
+        )
+
+})
+
+}
+function insertNewEmployee (employee)
+{   connection.query("INSERT INTO employee SET ?",
+        {  
+            first_name: employee.first_name, 
+            last_name: employee.last_name, 
+            role_id: employee.role_id, 
+            manager_id: employee.manager_id
+
+        },function(err){
+             if (err) throw err;
+             console.log("New Employee Added")
+
+        });
 }
