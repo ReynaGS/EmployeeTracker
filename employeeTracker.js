@@ -102,11 +102,12 @@ function addRole()
 {   // 1. do query to find all departments. 
     connection.query("SELECT * FROM department" , function(err, results) {
     if (err) throw err;
-    console.log(results);
+    // console.log(results);
     var depNames = results.map(function(value,index){
-       return value.id + "-" +value.name
+        return value.id + "-" +value.name
+        
     })
-    console.log(depNames); 
+    // console.log(depNames); 
     //2. Inquire (another function that ask questions to add role with departments as params)
     inquireRoleInfo(depNames)
     })
@@ -135,6 +136,29 @@ function inquireRoleInfo(departments)
 
 
 ]
-)
+).then(function(answers)
+{
+    var id = answers.roleDeptId.split("-")[0]; 
+    // console.log(id); 
+    // console.log(answers); 
+
+  insertNewRoleIntoDb({title: answers.roleTitle, salary: answers.roleSalary, department_id: id})
+    
+
+})
+
+}
+
+function insertNewRoleIntoDb (newRole)
+{   connection.query("INSERT INTO role SET ?",
+        {  
+            title: newRole.title, 
+            salary: newRole.salary, 
+           department_id: newRole.department_id, 
+
+        },function(err){
+             if (err) throw err;
+            console.log("New role has been created")
+        });
 
 }
